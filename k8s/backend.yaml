@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: kaveenazuredev.azurecr.io/backend:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          value: "postgres-service"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: "postgres"
+        - name: DB_PASSWORD
+          value: "mysecretpassword"
+        - name: DB_NAME
+          value: "urlshortener"
+        - name: REDIS_ADDR
+          value: "redis-service:6379"
+        - name: REDIS_PASSWORD
+          value: ""
+        volumeMounts:
+        - name: firebase-key
+          mountPath: /root/serviceAccountKey.json
+          subPath: serviceAccountKey.json
+          readOnly: true
+      volumes:
+      - name: firebase-key
+        secret:
+          secretName: firebase-key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: backend
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080

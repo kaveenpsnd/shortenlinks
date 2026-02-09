@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # 1. The Main Database
+  db:
+    image: postgres:15-alpine
+    container_name: shortener_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5433:5432" # Maps localhost:5432 -> container:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist data if container restarts
+
+  # 2. The Cache Layer
+  cache:
+    image: redis:7-alpine
+    container_name: shortener_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:

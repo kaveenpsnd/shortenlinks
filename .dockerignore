@@ -1,0 +1,19 @@
+# Ignore the frontend folder (it has its own Dockerfile)
+frontend
+front
+
+# Ignore Git history (saves space)
+.git
+.gitignore
+
+# Ignore local environment files (we inject secrets later)
+.env
+
+# Ignore VS Code settings
+.vscode
+
+# Ignore any local build artifacts
+bin
+main
+api.exe
+app.exe

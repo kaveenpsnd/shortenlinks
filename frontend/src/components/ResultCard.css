@@ -1,0 +1,178 @@
+.result-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  margin: 0 auto;
+  border: 1px solid #e7ebf3;
+  box-sizing: border-box;
+}
+
+.result-content {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .result-content {
+    flex-direction: row;
+  }
+}
+
+.qr-code-container {
+  background: #ffffff;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e7ebf3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+}
+
+@media (min-width: 640px) {
+  .qr-code-container {
+    align-self: flex-start;
+  }
+}
+
+.result-details {
+  flex: 1;
+  width: 100%;
+}
+
+.result-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
+.result-url {
+  margin-bottom: 1rem;
+}
+
+.short-url-link {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.check-icon {
+  color: #10b981; /* Success Green */
+  width: 20px;
+  height: 20px;
+}
+
+.original-url {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e7ebf3;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  overflow: hidden;
+}
+
+.url-label {
+  font-weight: 600;
+  color: #0d121b;
+  flex-shrink: 0;
+}
+
+.url-text {
+  color: #555b66;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-copy {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  color: #0d121b;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  font-size: 0.938rem;
+  border: 1px solid #e7ebf3;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.btn-copy:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.btn-share {
+  display: none; /* Hide unless supported, handled by JS logic but usually good to have fallback */
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background: #ffffff;
+  color: #0d121b;
+  border: 1px solid #e7ebf3;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-share:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+@media (min-width: 640px) {
+  .btn-share {
+    display: flex;
+  }
+}
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  color: var(--text-dark);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+@media (max-width: 768px) {
+  .result-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .qr-code-container {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .short-url-link {
+    font-size: 1rem;
+  }
+}
