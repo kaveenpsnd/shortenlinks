@@ -1,47 +1,45 @@
-# Environment variables
-.env
-serviceAccountKey.json
-
-# Go
+# Binaries
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-*.test
-*.out
-go.work
 
-# Node
-node_modules/
-dist/
-.vite/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# Go build output
+/tmp
+/bin
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Firebase credentials
+serviceAccountKey.json
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-
-# OS
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 .DS_Store
-Thumbs.db
 
-# Build artifacts
-frontend/dist/
-build/
+# Node
+node_modules/
+dist/
+dist-ssr/
 
-# Testing
-coverage/
-*.cover
-*.coverprofile
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
 
-# Cache
-*.cache
-.eslintcache
+# Test files
+test_body.json
+body.json
+add_test_data.sql
+test_expiration.go
+get_token.html

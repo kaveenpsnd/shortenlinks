@@ -6,18 +6,18 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://shrten.live, http://localhost:5173"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://shrten.link, http://localhost:5173"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
 spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - shrten.live
-    - api.shrten.live
+    - shrten.link
+    - api.shrten.link
     secretName: url-shortener-tls
   rules:
-  - host: shrten.live
+  - host: shrten.link
     http:
       paths:
       - path: /
@@ -27,7 +27,7 @@ spec:
             name: frontend-service
             port:
               number: 80
-  - host: api.shrten.live
+  - host: api.shrten.link
     http:
       paths:
       - path: /

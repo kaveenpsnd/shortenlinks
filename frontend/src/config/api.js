@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { auth } from './firebase';
 
-const API_BASE_URL = "https://api.shrten.live";
+const API_BASE_URL = "https://api.shrten.link";
 
 const api = axios.create({
   baseURL: API_BASE_URL,

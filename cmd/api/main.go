@@ -62,6 +62,11 @@ func main() {
 	}
 	log.Println("Successfully connected to Database!")
 
+	// Run migrations to ensure tables exist
+	if err := repository.RunMigrations(db); err != nil {
+		log.Fatal("Failed to run database migrations:", err)
+	}
+
 	// 4. Connect to Cache (Redis)
 	redisCache := cache.NewRedisCache(os.Getenv("REDIS_ADDR"), os.Getenv("REDIS_PASSWORD"))
 	log.Println("Successfully connected to Redis!")

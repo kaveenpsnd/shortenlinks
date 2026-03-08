@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: kaveenazuredev.azurecr.io/frontend:latest
+        image: kaveenazuredev.azurecr.io/frontend:v3
         ports:
         - containerPort: 80
 ---

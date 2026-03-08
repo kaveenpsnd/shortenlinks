@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: kaveenazuredev.azurecr.io/backend:latest
+        image: kaveenazuredev.azurecr.io/backend:v2
         ports:
         - containerPort: 8080
         env:
@@ -32,6 +32,8 @@ spec:
           value: "redis-service:6379"
         - name: REDIS_PASSWORD
           value: ""
+        - name: ALLOWED_ORIGINS
+          value: "http://shrten.link,https://shrten.link"
         volumeMounts:
         - name: firebase-key
           mountPath: /root/serviceAccountKey.json
