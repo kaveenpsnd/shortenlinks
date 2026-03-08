@@ -16,6 +16,7 @@
 
 # Firebase credentials
 serviceAccountKey.json
+get_token.html
 
 # IDE
 .vscode/
