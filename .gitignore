@@ -13,12 +13,13 @@
 .env
 .env.local
 .env.*.local
+.env.*.prod
 
-# Firebase credentials
+# Firebase credentials (use environment variables instead)
 serviceAccountKey.json
 get_token.html
 
-# IDE
+# IDE & Editor
 .vscode/
 .idea/
 *.suo
@@ -26,7 +27,50 @@ get_token.html
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+*~
 .DS_Store
+Thumbs.db
+
+# Node modules & build
+node_modules/
+/frontend/dist/
+/frontend/build/
+
+# Old Kubernetes configuration (migrated to Docker Compose)
+k8s/
+
+# Old deployment files
+*.yaml
+*.yml
+!docker-compose*.yml
+
+# Database backups
+*.sql.gz
+*.sql.bak
+
+# SSH keys (keep private)
+*.pem
+*.key
+!*.pub
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Debug
+.debug
+*.log
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+
 
 # Node
 node_modules/

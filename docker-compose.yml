@@ -1,30 +1,52 @@
 version: '3.8'
 
 services:
-  # 1. The Main Database
-  db:
+  # PostgreSQL Database
+  postgres:
     image: postgres:15-alpine
-    container_name: shortener_db
+    container_name: url-shortener-postgres-dev
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5433:5432" # Maps localhost:5432 -> container:5432
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+      POSTGRES_DB: ${DB_NAME:-shortener}
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Persist data if container restarts
-
-  # 2. The Cache Layer
-  cache:
-    image: redis:7-alpine
-    container_name: shortener_redis
-    restart: always
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
     ports:
-      - "6379:6379"
+      - "5433:5432"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: url-shortener-redis-dev
+    restart: always
+    command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
+    driver: local
   redis_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

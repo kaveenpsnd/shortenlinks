@@ -39,11 +39,14 @@ A modern, full-stack URL shortening platform with analytics, QR code generation,
 - **qrcode.react** — inline QR rendering
 
 ### Infrastructure
-- **Docker** — multi-stage builds for backend & frontend
-- **Kubernetes** — production orchestration
-- **NGINX** — frontend serving & reverse proxy
-- **Let's Encrypt** — TLS via cert-manager
-- **Azure Container Registry** — image hosting
+- **Docker & Docker Compose** — application orchestration
+- **NGINX** — reverse proxy with SSL/TLS
+- **PostgreSQL 15** — persistent database
+- **Redis 7** — in-memory cache
+- **DigitalOcean Droplet** — single Ubuntu 22.04 LTS server (2GB RAM)
+- **Let's Encrypt** — free SSL/TLS certificates
+- **GitHub Container Registry (GHCR)** — Docker image hosting
+- **GitHub Actions** — automated CI/CD pipeline
 
 ---
 

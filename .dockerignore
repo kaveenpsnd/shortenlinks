@@ -2,18 +2,65 @@
 frontend
 front
 
-# Ignore Git history (saves space)
+# Git
 .git
 .gitignore
+.gitattributes
 
-# Ignore local environment files (we inject secrets later)
-.env
-
-# Ignore VS Code settings
+# Version control & IDE
 .vscode
+.idea
+*.swp
+*.swo
+*~
 
-# Ignore any local build artifacts
+# Kubernetes (old Azure config)
+k8s/
+
+# Build outputs
 bin
 main
 api.exe
 app.exe
+dist/
+build/
+*.o
+*.a
+*.so
+
+# Environment files (injected via secrets)
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage/
+.nyc_output
+*.lcov
+
+# OS specific
+.DS_Store
+Thumbs.db
+.thumbsdb
+
+# CI/CD config
+.github/
+.circleci/
+.gitlab-ci.yml
+Jenkinsfile
+
+# Documentation
+*.md
+README.md
+docs/
+
+# Misc
+.cache
+.parcel-cache
+.next
+out
+.nuxt
+.tern-port
+.eslintcache
+.stylelintcache
+node_modules/

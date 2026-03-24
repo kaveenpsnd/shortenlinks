@@ -1,23 +1,40 @@
-# 1. Build Stage
+# Build stage
 FROM node:18-alpine as builder
+
 WORKDIR /app
 
-# Cache dependencies
-COPY package.json package-lock.json ./
-RUN npm install
+# Copy dependency files for better caching
+COPY package*.json ./
 
-# Copy source code (this layer will invalidate when code changes)
+# Install dependencies
+RUN npm ci
+
+# Copy source code
 COPY . .
 
-# Force rebuild by adding a build arg
-ARG CACHEBUST=1
-
-# Build the app
+# Build the application
 RUN npm run build
 
-# 2. Run Stage
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Runtime stage
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install production dependencies only
+RUN npm install -g http-server
+
+# Copy built app from builder
+COPY --from=builder /app/dist ./dist
+
+# Create non-root user for security
+RUN addgroup -g 1000 appuser && adduser -D -u 1000 -G appuser appuser
+USER appuser
+
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:3000 || exit 1
+
+# Serve the application
+CMD ["http-server", "dist", "-p", "3000", "--cors"]
