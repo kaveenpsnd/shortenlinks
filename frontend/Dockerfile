@@ -26,10 +26,6 @@ RUN npm install -g http-server
 # Copy built app from builder
 COPY --from=builder /app/dist ./dist
 
-# Create non-root user for security
-RUN addgroup -g 1000 appuser && adduser -D -u 1000 -G appuser appuser
-USER appuser
-
 EXPOSE 3000
 
 # Health check

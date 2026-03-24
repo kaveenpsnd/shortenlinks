@@ -29,10 +29,6 @@ WORKDIR /root/
 # Copy binary from builder
 COPY --from=builder /app/api .
 
-# Create non-root user for security
-RUN addgroup -g 1000 appuser && adduser -D -u 1000 -G appuser appuser
-USER appuser
-
 # Expose port
 EXPOSE 8080
 
