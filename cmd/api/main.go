@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/gin-contrib/cors"
@@ -68,7 +69,19 @@ func main() {
 	}
 
 	// 4. Connect to Cache (Redis)
-	redisCache := cache.NewRedisCache(os.Getenv("REDIS_ADDR"), os.Getenv("REDIS_PASSWORD"))
+	// Get Redis connection details from environment
+	redisHost := os.Getenv("REDIS_HOST")
+	redisPort := os.Getenv("REDIS_PORT")
+	if redisHost == "" {
+		redisHost = "localhost"
+	}
+	if redisPort == "" {
+		redisPort = "6379"
+	}
+	redisAddr := fmt.Sprintf("%s:%s", redisHost, redisPort)
+	redisPassword := os.Getenv("REDIS_PASSWORD")
+
+	redisCache := cache.NewRedisCache(redisAddr, redisPassword)
 	log.Println("Successfully connected to Redis!")
 
 	// 5. Dependency Injection

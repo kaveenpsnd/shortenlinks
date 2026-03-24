@@ -62,16 +62,20 @@ services:
       # Redis Configuration
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
       
       # Server Configuration
       PORT: 8080
       GIN_MODE: ${GIN_MODE:-release}
       
-      # Firebase Configuration (if applicable)
+      # Firebase Configuration
       FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_CREDENTIALS_PATH: /app/serviceAccountKey.json
       
       # Other configurations
       ENVIRONMENT: production
+    volumes:
+      - ./serviceAccountKey.json:/app/serviceAccountKey.json:ro
     ports:
       - "8080:8080"
     networks:
