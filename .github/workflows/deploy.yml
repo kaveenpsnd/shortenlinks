@@ -92,19 +92,27 @@ jobs:
             PROJECT_PATH="${{ secrets.DO_PROJECT_PATH }}"
             REPO_URL="https://github.com/${{ env.GITHUB_OWNER }}/shortenlinks.git"
             
-            # Check if project directory exists and is a git repository
+            # Handle repository setup (first run vs subsequent runs)
             if [ -d "$PROJECT_PATH/.git" ]; then
+              # Git repository exists, just update it
               echo "✅ Repository exists, updating..."
               cd "$PROJECT_PATH"
               git fetch origin
+              git reset --hard HEAD
               git checkout main
               git pull origin main
-            else
-              echo "📦 Repository not found, cloning..."
-              mkdir -p "$PROJECT_PATH"
+            elif [ -d "$PROJECT_PATH" ]; then
+              # Directory exists but not a git repo, clean and clone
+              echo "⚠️  Directory exists but not a git repo, cleaning..."
+              rm -rf "$PROJECT_PATH"
+              echo "📦 Cloning repository..."
               git clone "$REPO_URL" "$PROJECT_PATH"
               cd "$PROJECT_PATH"
-              git checkout main
+            else
+              # Directory doesn't exist, clone it
+              echo "📦 Repository not found, cloning..."
+              git clone "$REPO_URL" "$PROJECT_PATH"
+              cd "$PROJECT_PATH"
             fi
             
             # Log in to GHCR
