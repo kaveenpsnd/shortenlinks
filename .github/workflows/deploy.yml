@@ -134,10 +134,6 @@ jobs:
             docker pull ghcr.io/${{ env.GITHUB_OWNER }}/url-shortener-backend:latest
             docker pull ghcr.io/${{ env.GITHUB_OWNER }}/url-shortener-frontend:latest
             
-            # Clean up only url-shortener containers (don't touch other projects like hustlecode)
-            echo "Cleaning up url-shortener containers..."
-            docker rm -f url-shortener-redis url-shortener-postgres url-shortener-backend url-shortener-frontend url-shortener-nginx 2>/dev/null || true
-            
             # Deploy with zero downtime
             docker compose -f docker-compose.prod.yml up -d --force-recreate
             
