@@ -97,6 +97,11 @@ func main() {
 	}))
 
 	// --- PUBLIC ROUTES (No Login Required) ---
+	// Health check endpoint for Docker/Kubernetes
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
+	})
+
 	router.GET("/:code", h.Redirect)
 
 	// --- OPTIONAL AUTH ROUTES ---
