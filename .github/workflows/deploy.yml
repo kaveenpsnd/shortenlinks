@@ -148,19 +148,33 @@ jobs:
             echo "✅ Deployment completed successfully!"
 
       - name: Send Slack notification on success
-        if: success() && secrets.SLACK_WEBHOOK_URL != ''
+        if: success()
+        continue-on-error: true
         uses: rtCamp/action-slack@v2
         with:
-          status: ${{ job.status }}
+          status: custom
+          custom_payload: |
+            {
+              text: `URL Shortener deployed successfully`,
+              attachments: [{
+                color: 'good',
+                text: `Branch: ${process.env.AS_BRANCH}\nCommit: ${process.env.AS_COMMIT}\nAuthor: ${process.env.AS_AUTHOR}`,
+              }],
+            }
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          text: 'URL Shortener deployed successfully'
-          fields: repo,message,commit,author,action,eventName
 
       - name: Send Slack notification on failure
-        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        if: failure()
+        continue-on-error: true
         uses: rtCamp/action-slack@v2
         with:
-          status: ${{ job.status }}
+          status: custom
+          custom_payload: |
+            {
+              text: `URL Shortener deployment failed`,
+              attachments: [{
+                color: 'danger',
+                text: `Branch: ${process.env.AS_BRANCH}\nCommit: ${process.env.AS_COMMIT}\nAuthor: ${process.env.AS_AUTHOR}`,
+              }],
+            }
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          text: 'URL Shortener deployment failed'
-          fields: repo,message,commit,author,action,eventName
