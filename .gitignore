@@ -41,10 +41,11 @@ node_modules/
 # Old Kubernetes configuration (migrated to Docker Compose)
 k8s/
 
-# Old deployment files
+# Old deployment files (but allow GitHub Actions workflows and docker-compose)
 *.yaml
 *.yml
 !docker-compose*.yml
+!.github/workflows/*.yml
 
 # Database backups
 *.sql.gz

@@ -1,0 +1,184 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  GITHUB_OWNER: ${{ github.repository_owner }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and push backend image
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./cmd/api/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.GITHUB_OWNER }}/url-shortener-backend:latest
+            ${{ env.REGISTRY }}/${{ env.GITHUB_OWNER }}/url-shortener-backend:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.GITHUB_OWNER }}/url-shortener-backend:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.GITHUB_OWNER }}/url-shortener-backend:buildcache,mode=max
+
+      # Build and push frontend image
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.GITHUB_OWNER }}/url-shortener-frontend:latest
+            ${{ env.REGISTRY }}/${{ env.GITHUB_OWNER }}/url-shortener-frontend:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.GITHUB_OWNER }}/url-shortener-frontend:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.GITHUB_OWNER }}/url-shortener-frontend:buildcache,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create deployment environment file
+        run: |
+          cat > deploy.env << EOF
+          GHCR_USERNAME=${{ env.GITHUB_OWNER }}
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+          VITE_API_URL=${{ secrets.VITE_API_URL }}
+          VITE_FIREBASE_CONFIG=${{ secrets.VITE_FIREBASE_CONFIG }}
+          GIN_MODE=release
+          EOF
+
+      - name: Deploy to DigitalOcean Droplet
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DO_DROPLET_IP }}
+          username: ${{ secrets.DO_SSH_USER }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          script: |
+            set -e
+            
+            # Navigate to project directory
+            cd ${{ secrets.DO_PROJECT_PATH }}
+            
+            # Update repository
+            git fetch origin
+            git checkout main
+            git pull origin main
+            
+            # Log in to GHCR
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Create/update .env file
+            cat > .env << 'ENVEOF'
+            GHCR_USERNAME=${{ env.GITHUB_OWNER }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
+            VITE_FIREBASE_CONFIG=${{ secrets.VITE_FIREBASE_CONFIG }}
+            GIN_MODE=release
+            ENVEOF
+            
+            # Pull latest images
+            docker pull ghcr.io/${{ env.GITHUB_OWNER }}/url-shortener-backend:latest
+            docker pull ghcr.io/${{ env.GITHUB_OWNER }}/url-shortener-frontend:latest
+            
+            # Deploy with zero downtime
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
+            
+            # Wait for services to be healthy
+            echo "Waiting for services to be healthy..."
+            sleep 10
+            
+            # Verify deployment
+            if curl -f http://localhost:8080/health > /dev/null 2>&1; then
+              echo "✅ Backend is healthy"
+            else
+              echo "❌ Backend health check failed"
+              docker compose -f docker-compose.prod.yml logs backend
+              exit 1
+            fi
+            
+            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+              echo "✅ Frontend is healthy"
+            else
+              echo "❌ Frontend health check failed"
+              docker compose -f docker-compose.prod.yml logs frontend
+              exit 1
+            fi
+            
+            # Clean up
+            docker logout ghcr.io
+            
+            # Show deployment status
+            docker compose -f docker-compose.prod.yml ps
+            
+            echo "✅ Deployment completed successfully!"
+
+      - name: Send Slack notification on success
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "✅ URL Shortener deployed successfully",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment Status:* ✅ Success\n*Branch:* ${{ github.ref }}\n*Commit:* ${{ github.sha }}\n*Author:* ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+
+      - name: Send Slack notification on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "❌ URL Shortener deployment failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment Status:* ❌ Failed\n*Branch:* ${{ github.ref }}\n*Commit:* ${{ github.sha }}\n*Author:* ${{ github.actor }}\n*Action:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Logs>"
+                  }
+                }
+              ]
+            }
