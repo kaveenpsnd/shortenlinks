@@ -114,6 +114,18 @@ jobs:
             GIN_MODE=release
             ENVEOF
             
+            # Create Firebase credentials file
+            cat > serviceAccountKey.json << 'CREDNEOF'
+            ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
+            CREDNEOF
+            
+            # Verify credentials file was created
+            if [ ! -f serviceAccountKey.json ]; then
+              echo "❌ Failed to create serviceAccountKey.json"
+              exit 1
+            fi
+            echo "✅ Firebase credentials file created"
+            
             # Pull latest images
             docker pull ghcr.io/${{ env.GITHUB_OWNER }}/url-shortener-backend:latest
             docker pull ghcr.io/${{ env.GITHUB_OWNER }}/url-shortener-frontend:latest
