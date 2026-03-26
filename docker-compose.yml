@@ -41,6 +41,77 @@ services:
       timeout: 5s
       retries: 5
 
+  # Go Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: ./cmd/api/Dockerfile
+    container_name: url-shortener-backend-dev
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Database Configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      DB_NAME: ${DB_NAME:-shortener}
+      
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      
+      # Server Configuration
+      PORT: 8080
+      GIN_MODE: debug
+      
+      # Firebase Configuration
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_CREDENTIALS_PATH: /app/serviceAccountKey.json
+      
+      # Other configurations
+      ENVIRONMENT: development
+    volumes:
+      - ./serviceAccountKey.json:/app/serviceAccountKey.json:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    container_name: url-shortener-frontend-dev
+    restart: always
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
+      VITE_FIREBASE_CONFIG: ${VITE_FIREBASE_CONFIG}
+    networks:
+      - app-network
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 15s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
 volumes:
   postgres_data:
     driver: local
@@ -50,3 +121,4 @@ volumes:
 networks:
   app-network:
     driver: bridge
+    
