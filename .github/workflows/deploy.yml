@@ -61,22 +61,6 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Create deployment environment file
-        run: |
-          cat > deploy.env << EOF
-          GHCR_USERNAME=${{ env.GITHUB_OWNER }}
-          DB_USER=${{ secrets.DB_USER }}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_NAME=${{ secrets.DB_NAME }}
-          FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
-          VITE_API_URL=${{ secrets.VITE_API_URL }}
-          VITE_FIREBASE_CONFIG=${{ secrets.VITE_FIREBASE_CONFIG }}
-          GIN_MODE=release
-          EOF
-
       - name: Deploy to DigitalOcean Droplet
         uses: appleboy/ssh-action@master
         with:
@@ -141,7 +125,7 @@ jobs:
             echo "Waiting for services to be healthy..."
             sleep 10
             
-            # Verify deployment
+            # Verify deployment (Backend)
             if curl -f http://localhost:8080/health > /dev/null 2>&1; then
               echo "✅ Backend is healthy"
             else
@@ -150,16 +134,8 @@ jobs:
               exit 1
             fi
             
-            if curl -f http://localhost:3000 > /dev/null 2>&1; then
-              echo "✅ Frontend is healthy"
-            else
-              echo "❌ Frontend health check failed"
-              docker compose -f docker-compose.prod.yml logs frontend
-              exit 1
-            fi
-            
-            # Clean up
-            docker logout ghcr.io
+            # Clean up old images
+            docker image prune -f
             
             # Show deployment status
             docker compose -f docker-compose.prod.yml ps
