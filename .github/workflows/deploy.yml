@@ -119,7 +119,19 @@ jobs:
             docker pull ghcr.io/${{ env.GITHUB_OWNER }}/url-shortener-backend:latest
             docker pull ghcr.io/${{ env.GITHUB_OWNER }}/url-shortener-frontend:latest
             
-            # Deploy with zero downtime
+            # Stop any host web servers that might conflict with port 80/443
+            echo "Stopping potential host web servers..."
+            sudo systemctl stop nginx || true
+            sudo systemctl disable nginx || true
+            sudo systemctl stop apache2 || true
+            sudo systemctl disable apache2 || true
+            
+            # Stop previous stack to definitively free up ports
+            echo "Stopping previous Docker Compose stack..."
+            docker compose -f docker-compose.prod.yml down --remove-orphans || true
+            
+            # Deploy
+            echo "Starting new stack..."
             docker compose -f docker-compose.prod.yml up -d --force-recreate
             
             # Wait for services to be healthy
