@@ -9,7 +9,6 @@ on:
 env:
   REGISTRY: ghcr.io
   GITHUB_OWNER: ${{ github.repository_owner }}
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build-and-push:
@@ -34,7 +33,7 @@ jobs:
 
       # Build and push backend image
       - name: Build and push backend image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./cmd/api/Dockerfile
@@ -47,7 +46,7 @@ jobs:
 
       # Build and push frontend image
       - name: Build and push frontend image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
