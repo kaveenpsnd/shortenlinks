@@ -115,6 +115,15 @@ jobs:
             ENVEOF
             
             # Create Firebase credentials file
+            # Ensure serviceAccountKey.json is a file (not a directory)
+            if [ -d serviceAccountKey.json ]; then
+              echo "⚠️ serviceAccountKey.json is a directory; removing it..."
+              rm -rf serviceAccountKey.json
+            fi
+            
+            rm -f serviceAccountKey.json
+            umask 077
+            
             cat > serviceAccountKey.json << 'CREDNEOF'
             ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
             CREDNEOF
