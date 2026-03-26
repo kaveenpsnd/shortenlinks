@@ -21,7 +21,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Install production dependencies only
-RUN npm install -g http-server
+RUN apk add --no-cache curl && npm install -g http-server
 
 # Copy built app from builder
 COPY --from=builder /app/dist ./dist
@@ -30,7 +30,7 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:3000 || exit 1
+  CMD curl -f http://localhost:3000 || exit 1
 
 # Serve the application
 CMD ["http-server", "dist", "-p", "3000", "--cors"]
