@@ -72,8 +72,6 @@ services:
       ENVIRONMENT: production
     volumes:
       - ./serviceAccountKey.json:/app/serviceAccountKey.json:ro
-    ports:
-      - "8080:8080"
     networks:
       - app-network
     healthcheck:
@@ -91,8 +89,6 @@ services:
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://api.shrten.link}
       VITE_FIREBASE_CONFIG: ${VITE_FIREBASE_CONFIG}
-    ports:
-      - "3000:3000"
     networks:
       - app-network
     depends_on:

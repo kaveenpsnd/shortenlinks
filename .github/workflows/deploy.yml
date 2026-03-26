@@ -123,16 +123,23 @@ jobs:
             
             # Wait for services to be healthy
             echo "Waiting for services to be healthy..."
-            sleep 10
+            check_health() {
+              for i in {1..12}; do
+                STATUS=$(docker inspect -f '{{.State.Health.Status}}' $1 2>/dev/null || echo "missing")
+                if [ "$STATUS" = "healthy" ]; then
+                  echo "✅ $1 is healthy"
+                  return 0
+                fi
+                echo "⏳ Waiting for $1... (status: $STATUS)"
+                sleep 5
+              done
+              echo "❌ $1 failed to become healthy"
+              docker compose -f docker-compose.prod.yml logs $2
+              return 1
+            }
             
-            # Verify deployment (Backend)
-            if curl -f http://localhost:8080/health > /dev/null 2>&1; then
-              echo "✅ Backend is healthy"
-            else
-              echo "❌ Backend health check failed"
-              docker compose -f docker-compose.prod.yml logs backend
-              exit 1
-            fi
+            check_health "url-shortener-backend" "backend" || exit 1
+            check_health "url-shortener-frontend" "frontend" || exit 1
             
             # Clean up old images
             docker image prune -f
